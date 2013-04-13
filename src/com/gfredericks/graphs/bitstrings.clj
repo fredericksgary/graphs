@@ -1,4 +1,4 @@
-(ns nf.graphs.bitstrings
+(ns com.gfredericks.graphs.bitstrings
   (:refer-clojure :exclude [count nth assoc seq])
   (:require [clojure.core :as core]))
 

@@ -1,6 +1,6 @@
 (ns com.gfredericks.graphs
   (:refer-clojure :exclude [empty])
-  (:require [clojure.contrib.combinatorics :as comb]
+  (:require [clojure.math.combinatorics :as comb]
             [com.gfredericks.graphs.bitstrings :as bits]))
 
 (defprotocol IGraph
@@ -87,9 +87,9 @@
 (let [+' #(if (some #{:infinity} [%1 %2])
            :infinity
            (+ %1 %2))
-      min' (cond (= :infinity %1) %2
-                 (= :infinity %2) %1
-                 :else (min %1 %2))]
+      min' #(cond (= :infinity %1) %2
+                  (= :infinity %2) %1
+                  :else (min %1 %2))]
   (defn distances-through
     [node ds]
     (into {}
@@ -111,14 +111,15 @@
           new-ds
           (recur nodes new-ds))))))
 
-(defn distances-per-node
-  "Returns a map from each node to the sum of its
+(let [map-from-fn (fn [f ks] (into {} (map (juxt identity f) ks)))]
+  (defn distances-per-node
+    "Returns a map from each node to the sum of its
    distances to all other nodes."
-  [g]
-  (let [apd (all-pairs-distances g)]
-    (map-from-fn
-      (fn [node] (apply + (map apd (filter #(% node) (keys apd)))))
-      (vertices g))))
+    [g]
+    (let [apd (all-pairs-distances g)]
+      (map-from-fn
+       (fn [node] (apply + (map apd (filter #(% node) (keys apd)))))
+       (vertices g)))))
 
 (defn connected-components
   [g]

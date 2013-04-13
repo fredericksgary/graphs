@@ -1,6 +1,7 @@
-(ns nf.test.graphs
-  (:use clojure.test)
-  (:use [nf graphs graph6]))
+(ns com.gfredericks.graphs-test
+  (:refer-clojure :exclude [empty])
+  (:require [clojure.test :refer :all]
+            [com.gfredericks.graphs :refer :all]))
 
 (deftest graph-atts-test
   (let [g {:order 7, :edges #{#{0 2} #{1 3} #{2 3} #{1 4} #{2 4} #{0 5} #{3 5}
@@ -30,12 +31,6 @@
             #{5 6} 1}))
     (is (= (degrees g)
            {0 3, 1 3, 2 3, 3 4, 4 4, 5 4, 6 5}))
-    (is (= (compute-graph-attributes g)
-           {:min_degree 3,
-            :max_degree 5,
-            :connectivity 3,
-            :diameter 2,
-            :radius 2}))
     ;; I _think_ it's three...
     (is (= 3 (edge-connectivity g)))))
 
