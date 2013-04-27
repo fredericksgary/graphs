@@ -3,6 +3,10 @@
 A Clojure library for doing graph-theory stuff on small undirected
 graphs.
 
+## Usage
+
+Leiningen: `[com.gfredericks/graphs "0.1.0"]`
+
 ## License
 
 Copyright © 2013 Gary Fredericks
