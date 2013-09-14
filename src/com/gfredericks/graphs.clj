@@ -212,6 +212,7 @@
         (recur (inc k))))))
 
 (defn degrees
+  "Given a graph, returns a map from vertex numbers to their degree."
   [g]
   (reduce
     (fn [degs edge]
@@ -227,6 +228,8 @@
     (- (apply max ds) (apply min ds))))
 
 (defn rand-graph
+  "Returns a random graph of the given order where each edge exists
+   with probability p (default 0.5)."
   ([n] (rand-graph n 0.5))
   ([n p]
     {:order n,
