@@ -257,11 +257,10 @@
                         (boolean (g2-edges #{to (mapping other-from)}))))
                     (range (count mapping))))
                 tos-left)]
-        (apply concat
-          (map
-            (fn [to]
-              (lazy-seq (isomorphisms g1-edges g2-edges (conj mapping to) (disj tos-left to))))
-            compatible-tos))))))
+        (mapcat
+         (fn [to]
+           (lazy-seq (isomorphisms g1-edges g2-edges (conj mapping to) (disj tos-left to))))
+         compatible-tos)))))
 
 (defn isomorphic? [g1 g2] (boolean (first (isomorphisms g1 g2))))
 
