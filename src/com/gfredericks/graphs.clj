@@ -214,13 +214,9 @@
 (defn degrees
   "Given a graph, returns a map from vertex numbers to their degree."
   [g]
-  (reduce
-    (fn [degs edge]
-      (let [[a b] (seq edge)]
-        (assoc degs a (inc (degs a))
-                    b (inc (degs b)))))
-    (into {} (map vector (range (:order g)) (repeat 0)))
-    (:edges g)))
+  (->> (edges g)
+       (apply concat)
+       (frequencies)))
 
 (defn unfairness
   [g]
