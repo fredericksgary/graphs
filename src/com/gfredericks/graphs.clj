@@ -157,17 +157,12 @@
 
 (def connected? (comp #(= 1 %) count connected-components))
 
-(defn- make-permutation
-  [p]
-  (if (string? p)
-    (vec
-      (map #(Integer. (str %)) p))
-    p))
-
 (defn permute
+  "Given a graph and a permutation (which is some sort
+   of (vec (shuffle (range order)))), returns a new graph with the
+   vertices permuted according to the permutation."
   [g p]
-  (let [p (make-permutation p)]
-    (reduce add-edge (empty g) (for [[a b] (edges g)] [(p a) (p b)]))))
+  (reduce add-edge (empty g) (for [[a b] (edges g)] [(p a) (p b)])))
 
 (defn induced-subgraph
   "g is a graph, coll is a collection of vertices. Returns the induced subgraph with vertices
