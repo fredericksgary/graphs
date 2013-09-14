@@ -214,9 +214,11 @@
 (defn degrees
   "Given a graph, returns a map from vertex numbers to their degree."
   [g]
+  ;; whoops this doesn't give zero on nonexist
   (->> (edges g)
        (apply concat)
-       (frequencies)))
+       (frequencies)
+       (merge (zipmap (vertices g) (repeat 0)))))
 
 (defn unfairness
   [g]
