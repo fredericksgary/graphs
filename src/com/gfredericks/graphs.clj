@@ -1,7 +1,18 @@
 (ns com.gfredericks.graphs
+  "Functions for manipulation of undirected graphs. Since this is
+   intended for study of the mathematical objects rather than
+   graph-like data, the vertex set is restricted to (range n)."
   (:refer-clojure :exclude [empty])
   (:require [clojure.math.combinatorics :as comb]
             [com.gfredericks.graphs.bitstrings :as bits]))
+
+;; TODO: what should be the API for adding/removing vertices,
+;; especially considering the (range n) restriction for vertexes?
+;;
+;; A minimal attempt would be (pop-vertex g) and (add-vertex g) where
+;; the vertex to add/remove is assumed to be (dec n) or n
+;; respectively. Wanting to remove any other vertex would require a
+;; relabeling.
 
 (defprotocol IGraph
   (order [g])
