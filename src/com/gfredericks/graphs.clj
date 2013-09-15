@@ -229,12 +229,13 @@
   "Returns a random graph of the given order where each edge exists
    with probability p (default 0.5)."
   ([n] (rand-graph n 0.5))
-  ([n p]
+  ([n p] (rand-graph n p (java.util.Random.)))
+  ([n p ^java.util.Random r]
     {:order n,
      :edges (set (for [x (range n),
                        y (range n),
                        :when (< x y),
-                       :when (< p (rand))] #{x y}))}))
+                       :when (< p (.nextDouble r))] #{x y}))}))
 
 ; assumes that the vertices are (range (:order g))
 (defn isomorphisms
