@@ -291,7 +291,7 @@
      :edges (set (for [x (range n),
                        y (range n),
                        :when (< x y),
-                       :when (< p (.nextDouble r))] #{x y}))}))
+                       :when (< (.nextDouble r) p)] #{x y}))}))
 
 ; assumes that the vertices are (range (:order g))
 (defn isomorphisms
