@@ -181,7 +181,7 @@
 (let [map-from-fn (fn [f ks] (into {} (map (juxt identity f) ks)))]
   (defn distances-per-node
     "Returns a map from each node to the sum of its
-   distances to all other nodes."
+     distances to all other nodes."
     [g]
     (let [apd (all-pairs-distances g)]
       (map-from-fn
