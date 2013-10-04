@@ -81,3 +81,16 @@
                       (+ 63 <>)
                       (char <>))))
          (apply str (write-order order)))))
+
+;;;;;;;;;;;;;;;;;;;
+;;               ;;
+;; Serialization ;;
+;;               ;;
+;;;;;;;;;;;;;;;;;;;
+
+(defmethod print-method com.gfredericks.graphs.VectorGraph
+  [g ^java.io.Writer w]
+  (doto w
+    (.write "#graphs/graph \"")
+    (.write (->graph6 g))
+    (.write "\"")))
