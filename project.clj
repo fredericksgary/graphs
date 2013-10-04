@@ -5,4 +5,5 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/math.combinatorics "0.0.4"]]
-  :profiles {:dev {:dependencies [[criterium "0.4.2"]]}})
+  :profiles {:dev {:dependencies [[criterium "0.4.2"]
+                                  [reiddraper/simple-check "0.4.1"]]}})

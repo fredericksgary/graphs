@@ -3,8 +3,7 @@
    intended for study of the mathematical objects rather than
    graph-like data, the vertex set is restricted to (range n)."
   (:refer-clojure :exclude [empty])
-  (:require [clojure.math.combinatorics :as comb]
-            [com.gfredericks.graphs.bitstrings :as bits]))
+  (:require [clojure.math.combinatorics :as comb]))
 
 ;; TODO: what should be the API for adding/removing vertices,
 ;; especially considering the (range n) restriction for vertexes?
@@ -23,14 +22,6 @@
   (add-edge [g e])
   (remove-edge [g e])
   (empty [g]))
-
-(defn- g6-bitstring-index
-  "Given two vertex indices returns the bit-index (including the six-bit
-  order field) of the edge within the graph6 bitstring."
-  [a b]
-  (let [[a b] (if (< b a) [b a] [a b])
-        base (/ (* b (dec b)) 2)]
-    (+ base a 6)))
 
 (extend-protocol IGraph
 
@@ -53,37 +44,7 @@
   (remove-edge [this e]
     (let [[v1 v2] (seq e)]
       (update-in this [:edges] disj #{v1 v2})))
-  (empty [this] (assoc this :edges #{}))
-
-  ;; graph6 representation
-  String
-  (order [g6] (-> g6 first int (- 63)))
-  (neighbors [g6 v]
-    (for [a (range (order g6))
-          :when (not= a v)
-          :when (edge? g6 [a v])]
-      a))
-  (edge? [g6 e]
-    (let [[a b] (seq e)]
-      (= 1 (bits/nth g6 (g6-bitstring-index a b)))))
-  (edges [g6]
-    (for [a (range (order g6))
-          b (range a)
-          :when (edge? g6 [a b])]
-      [a b]))
-  (vertices [g6]
-    (range (order g6)))
-  (add-edge [g6 e]
-    (let [[a b] (seq e)]
-      (bits/assoc g6
-                  (g6-bitstring-index a b)
-                  1)))
-  (remove-edge [g6 e]
-    (let [[a b] (seq e)]
-      (bits/assoc g6
-                  (g6-bitstring-index a b)
-                  0)))
-  (empty [g6] (let [[c & cs] g6] (apply str c (repeat (count cs) \?)))))
+  (empty [this] (assoc this :edges #{})))
 
 (defn ^:private indices-64
   "Given a pair of vertex numbers, returns a pair of indices indicating
@@ -136,12 +97,25 @@
     (VectorGraph. order (vec (repeat (count adjacency) 0)))))
 
 (defn vector-graph
-  [order]
+  [order & edges]
   (let [edge-count (/ (* order (dec order)) 2)
         long-count (cond-> (quot edge-count 64)
-                           (pos? (rem edge-count 64)) (inc))]
-    (VectorGraph. order (vec (repeat long-count 0)))))
+                           (pos? (rem edge-count 64)) (inc))
+        the-vector (vec (repeat long-count 0))
 
+        the-vector (cond-> the-vector
+                           (seq edges)
+                           (as-> <>
+                                 (transient <>)
+                                 (reduce
+                                  (fn [v e]
+                                    (let [[a b] (seq e)
+                                          [i j] (indices-64 a b)]
+                                      (assoc! v i (bit-set (get v i) j))))
+                                  <>
+                                  edges)
+                                 (persistent! <>)))]
+    (VectorGraph. order the-vector)))
 
 (defn all-pairs
   [order]
