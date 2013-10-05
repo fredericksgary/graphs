@@ -2,8 +2,7 @@
   "Functions for manipulation of undirected graphs. Since this is
    intended for study of the mathematical objects rather than
    graph-like data, the vertex set is restricted to (range n)."
-  (:refer-clojure :exclude [empty])
-  (:require [clojure.math.combinatorics :as comb]))
+  (:refer-clojure :exclude [empty]))
 
 ;; TODO: what should be the API for adding/removing vertices,
 ;; especially considering the (range n) restriction for vertexes?
@@ -117,144 +116,6 @@
                                  (persistent! <>)))]
     (VectorGraph. order the-vector)))
 
-(defn all-pairs
-  [order]
-  (mapcat
-    (fn [b]
-      (map #(hash-set % b) (range b)))
-    (range order)))
-
-;; define a couple functions that handle :infinity
-(let [+' #(if (some #{:infinity} [%1 %2])
-           :infinity
-           (+ %1 %2))
-      min' #(cond (= :infinity %1) %2
-                  (= :infinity %2) %1
-                  :else (min %1 %2))]
-  (defn distances-through
-    [node ds]
-    (into {}
-          (map
-           (fn [[pair distance]]
-             (if (pair node)
-               [pair distance]
-               (let [[a b] (seq pair)]
-                 [pair (min' distance (+' (ds #{a node}) (ds #{b node})))])))
-           ds))))
-
-(defn all-pairs-distances
-  [g]
-  (let [ap (all-pairs (order g))
-        init (into {} (map #(if (edge? g %) [% 1] [% :infinity]) ap))]
-    (loop [[node & nodes] (vertices g) ds init]
-      (let [new-ds (distances-through node ds)]
-        (if (empty? nodes)
-          new-ds
-          (recur nodes new-ds))))))
-
-(let [map-from-fn (fn [f ks] (into {} (map (juxt identity f) ks)))]
-  (defn distances-per-node
-    "Returns a map from each node to the sum of its
-     distances to all other nodes."
-    [g]
-    (let [apd (all-pairs-distances g)]
-      (map-from-fn
-       (fn [node] (apply + (map apd (filter #(% node) (keys apd)))))
-       (vertices g)))))
-
-(defn connected-components
-  [g]
-  (let [vertices (range (order g))
-        groups (zipmap vertices (map list vertices))
-        membership (vec vertices)]
-    (->>
-     (edges g)
-     (reduce (fn [[groups membership :as acc] edge]
-               (let [[a b] edge
-                     ma (membership a)
-                     mb (membership b)]
-                 (if (= ma mb)
-                   acc
-                   ;; merge everybody in b into a
-                   (let [groups* (-> groups
-                                     (dissoc mb)
-                                     (update-in [ma] concat (groups mb)))
-                         membership* (reduce (fn [v i] (assoc v i ma)) membership (groups mb))]
-                     [groups* membership*]))))
-             [groups membership])
-     first
-     vals)))
-
-(def connected? (comp #(= 1 %) count connected-components))
-
-(defn permute
-  "Given a graph and a permutation (which is some sort
-   of (vec (shuffle (range order)))), returns a new graph with the
-   vertices permuted according to the permutation."
-  [g p]
-  (reduce add-edge (empty g) (for [[a b] (edges g)] [(p a) (p b)])))
-
-(defn induced-subgraph
-  "g is a graph, coll is a collection of vertices. Returns the induced subgraph with vertices
-   labeled 0 to n-1 (as normal) corresponding to the supplied vertices in sorted order."
-  [g coll]
-  (let [vs (set coll),
-        edge-map (into {} (map vector (sort vs) (range (count vs))))]
-    {:order (count vs),
-     :edges
-       (set
-         (map
-           (fn [edge]
-             (let [[a b] (seq edge)]
-               #{(edge-map a) (edge-map b)}))
-           (filter
-             (fn [edge]
-               (let [[a b] (seq edge)]
-                 (and (vs a) (vs b))))
-             (:edges g))))}))
-
-(defn disconnected-subgraphs
-  [g order]
-  (let [subgraphs (map
-                    (partial induced-subgraph g)
-                    (comb/combinations (range (:order g)) order))]
-    (filter (comp not connected?) subgraphs)))
-
-(defn connectivity
-  "Measures vertex-connectivity."
-  [g]
-  (loop [k 0]
-    (if (= k (dec (:order g)))
-      k
-      (if (empty? (disconnected-subgraphs g (- (:order g) k)))
-        (recur (inc k))
-        k))))
-
-(defn edge-connectivity
-  [g]
-  (let [edges (vec (:edges g))
-        edge-subgraphs (fn [num-edges-to-remove]
-                         (for [edges-to-remove (comb/combinations edges num-edges-to-remove)]
-                           (apply update-in g [:edges] disj edges-to-remove)))]
-    (loop [k 0]
-      (if (some (complement connected?) (edge-subgraphs k))
-        k
-        (recur (inc k))))))
-
-(defn degrees
-  "Given a graph, returns a map from vertex numbers to their degree."
-  [g]
-  ;; whoops this doesn't give zero on nonexist
-  (->> (edges g)
-       (apply concat)
-       (frequencies)
-       (merge (zipmap (vertices g) (repeat 0)))))
-
-(defn unfairness
-  [g]
-  (let [ds (vals (distances-per-node g))]
-    (- (apply max ds) (apply min ds))))
-
 (defn rand-graph
   "Returns a random graph of the given order where each edge exists
    with probability p (default 0.5)."
@@ -266,31 +127,3 @@
                        y (range n),
                        :when (< x y),
                        :when (< (.nextDouble r) p)] #{x y}))}))
-
-; assumes that the vertices are (range (:order g))
-(defn isomorphisms
-  "Returns a lazy seq of all permutations that transform g1 into g2."
-  ([g1 {:keys [order edges]}]
-    (isomorphisms (:edges g1) edges [] (set (range order))))
-  ([g1-edges g2-edges mapping tos-left]
-    (if (empty? tos-left)
-      [mapping]
-      (let [from (count mapping),
-            compatible-tos
-              (filter
-                (fn [to]
-                  (every?
-                    (fn [other-from]
-                      (=
-                        (boolean (g1-edges #{from other-from}))
-                        (boolean (g2-edges #{to (mapping other-from)}))))
-                    (range (count mapping))))
-                tos-left)]
-        (mapcat
-         (fn [to]
-           (lazy-seq (isomorphisms g1-edges g2-edges (conj mapping to) (disj tos-left to))))
-         compatible-tos)))))
-
-(defn isomorphic? [g1 g2] (boolean (first (isomorphisms g1 g2))))
-
-(defn automorphisms [x] (isomorphisms x x))

@@ -1,7 +1,8 @@
-(ns com.gfredericks.graphs-test
+(ns com.gfredericks.graphs.algorithms-test
   (:refer-clojure :exclude [empty])
   (:require [clojure.test :refer :all]
-            [com.gfredericks.graphs :refer :all]))
+            [com.gfredericks.graphs :refer :all]
+            [com.gfredericks.graphs.algorithms :refer :all]))
 
 (deftest graph-atts-test
   (let [g {:order 7, :edges #{#{0 2} #{1 3} #{2 3} #{1 4} #{2 4} #{0 5} #{3 5}
