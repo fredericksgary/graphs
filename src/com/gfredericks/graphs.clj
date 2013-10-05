@@ -122,8 +122,8 @@
   ([n] (rand-graph n 0.5))
   ([n p] (rand-graph n p (java.util.Random.)))
   ([n p ^java.util.Random r]
-    {:order n,
-     :edges (set (for [x (range n),
-                       y (range n),
-                       :when (< x y),
-                       :when (< (.nextDouble r) p)] #{x y}))}))
+     (apply vector-graph n
+            (for [x (range n),
+                  y (range n),
+                  :when (< x y),
+                  :when (< (.nextDouble r) p)] [x y]))))
