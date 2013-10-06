@@ -145,8 +145,15 @@
 ; assumes that the vertices are (range (:order g))
 (defn isomorphisms
   "Returns a lazy seq of all permutations that transform g1 into g2."
-  ([g1 {:keys [order edges]}]
-    (isomorphisms (:edges g1) edges [] (set (range order))))
+  ([g1 g2]
+     (isomorphisms (->> (edges g1)
+                        (map set)
+                        (set))
+                   (->> (edges g2)
+                        (map set)
+                        (set))
+                   []
+                   (-> g1 order range set)))
   ([g1-edges g2-edges mapping tos-left]
     (if (empty? tos-left)
       [mapping]
