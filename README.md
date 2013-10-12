@@ -5,7 +5,7 @@ graphs.
 
 ## Usage
 
-Leiningen: `[com.gfredericks/graphs "0.3.0"]`
+Leiningen: `[com.gfredericks/graphs "0.3.1"]`
 
 ## License
 
