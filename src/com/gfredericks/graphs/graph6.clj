@@ -2,7 +2,8 @@
   "Functions for converting to and from the graph6 ASCII format.
 
    Spec is here: http://cs.anu.edu.au/~bdm/data/formats.txt"
-  (:require [com.gfredericks.graphs :as g]))
+  (:require [com.gfredericks.graphs.protocols :as g]
+            [com.gfredericks.graphs.impl :refer [vector-graph]]))
 
 ;; TODO: sparse6?
 
@@ -62,7 +63,7 @@
 (defn graph6->vector-graph
   [s]
   (let [order (read-order s)]
-    (apply g/vector-graph order (read-edges order s))))
+    (apply vector-graph order (read-edges order s))))
 
 (defn ->graph6
   [g]
@@ -88,7 +89,7 @@
 ;;               ;;
 ;;;;;;;;;;;;;;;;;;;
 
-(defmethod print-method com.gfredericks.graphs.VectorGraph
+(defmethod print-method com.gfredericks.graphs.impl.VectorGraph
   [g ^java.io.Writer w]
   (doto w
     (.write "#graphs/graph \"")
