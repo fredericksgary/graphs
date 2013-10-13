@@ -38,6 +38,12 @@
     ((juxt quot rem) i 64)))
 
 (deftype VectorGraph [order adjacency]
+  Object
+  (hashCode [_] (hash [order adjacency]))
+  (equals [_ o]
+    (and (instance? VectorGraph o)
+         (= order (.order o))
+         (= adjacency (.adjacency o))))
   IGraph
   (order [_] order)
   (neighbors [_ a]

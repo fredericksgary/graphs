@@ -92,6 +92,5 @@
 (defmethod print-method com.gfredericks.graphs.impl.VectorGraph
   [g ^java.io.Writer w]
   (doto w
-    (.write "#graphs/graph \"")
-    (.write (->graph6 g))
-    (.write "\"")))
+    (.write "#graphs/graph ")
+    (.write (pr-str (->graph6 g)))))

@@ -15,6 +15,25 @@
                 p (.nextDouble r)]
             (g/rand-graph order p r)))])
 
+(defn remove-vertex
+  [g v]
+  {:pre [(pos? (g/order g))]}
+  (apply g/vector-graph
+         (dec (g/order g))
+         (for [[a b] (g/edges g)
+               :when (distinct? a b v)
+               :let [a' (cond-> a (> a v) (dec))
+                     b' (cond-> b (> b v) (dec))]]
+           [a' b'])))
+
+(extend-protocol gen/Shrink
+  com.gfredericks.graphs.impl.VectorGraph
+  (shrink [g]
+    (concat (for [v (range (g/order g))]
+              (remove-vertex g v))
+            (for [e (g/edges g)]
+              (g/remove-edge g e)))))
+
 
 (defspec graph6-format-works-correctly
   200
