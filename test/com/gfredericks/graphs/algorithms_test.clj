@@ -1,7 +1,11 @@
 (ns com.gfredericks.graphs.algorithms-test
   (:refer-clojure :exclude [empty])
   (:require [clojure.test :refer :all]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
             [com.gfredericks.graphs :refer :all]
+            [com.gfredericks.graphs.graph6-test :refer [gen-graph]]
             [com.gfredericks.graphs.algorithms :refer :all]))
 
 (deftest graph-atts-test
@@ -60,6 +64,11 @@
     (is (= (set (automorphisms g))
            #{[0 1 2 3] [1 2 3 0] [2 3 0 1] [3 0 1 2]
              [3 2 1 0] [2 1 0 3] [1 0 3 2] [0 3 2 1]}))))
+
+(defspec automorphisms-spec
+  (prop/for-all [g gen-graph]
+    (every? #(= g (permute g %))
+            (automorphisms g))))
 
 (deftest isomorphisms-test
   (let [g1 {:order 10, :edges #{#{0 5} #{2 4} #{3 5} #{2 7} #{1 8} #{4 6}

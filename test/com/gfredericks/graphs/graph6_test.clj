@@ -1,19 +1,24 @@
 (ns com.gfredericks.graphs.graph6-test
   (:require [com.gfredericks.graphs :as g]
             [com.gfredericks.graphs.graph6 :refer :all]
-            [simple-check.clojure-test :refer [defspec]]
-            [simple-check.generators :as gen]
-            [simple-check.properties :as prop]))
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]))
 
+
+(defn gen-graph*
+  [order]
+  (gen/let [flags (gen/vector gen/boolean (/ (* order (dec order)) 2))]
+    (apply g/vector-graph order
+           (->> (for [x (range order)
+                      y (range x)]
+                  [x y])
+                (map vector flags)
+                (filter first)
+                (map second)))))
 
 (def gen-graph
-  [:gen (fn [^java.util.Random r size]
-          (let [order (-> (gen/call-gen gen/pos-int r size)
-                          (Math/sqrt)
-                          (int)
-                          (* 5))
-                p (.nextDouble r)]
-            (g/rand-graph order p r)))])
+  (gen/bind (gen/choose 0 10) gen-graph*))
 
 (defn remove-vertex
   [g v]
@@ -25,15 +30,6 @@
                :let [a' (cond-> a (> a v) (dec))
                      b' (cond-> b (> b v) (dec))]]
            [a' b'])))
-
-(extend-protocol gen/Shrink
-  com.gfredericks.graphs.impl.VectorGraph
-  (shrink [g]
-    (concat (for [v (range (g/order g))]
-              (remove-vertex g v))
-            (for [e (g/edges g)]
-              (g/remove-edge g e)))))
-
 
 (defspec graph6-format-works-correctly
   200

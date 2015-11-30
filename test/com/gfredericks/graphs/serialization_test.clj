@@ -1,9 +1,9 @@
 (ns com.gfredericks.graphs.serialization-test
   (:require [com.gfredericks.graphs :as g]
             [com.gfredericks.graphs.graph6-test :refer [gen-graph]]
-            [simple-check.clojure-test :refer [defspec]]
-            [simple-check.generators :as gen]
-            [simple-check.properties :as prop]))
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]))
 
 (defspec serialization-roundtrip
   200
