@@ -49,6 +49,28 @@
        (fn [node] (apply + (map apd (filter #(% node) (keys apd)))))
        (vertices g)))))
 
+(defn distance
+  "Returns an integer distance, or nil if the vertices are not in the
+  same connected component"
+  [g v1 v2]
+  (loop [d 0
+         current #{v1}
+         seen #{}]
+    (cond (current v2)
+          d
+
+          (empty? current)
+          nil
+
+          :else
+          (let [new-neighbors (->> current
+                                   (mapcat #(neighbors g %))
+                                   (distinct)
+                                   (remove current)
+                                   (remove seen)
+                                   (set))]
+            (recur (inc d) new-neighbors (into seen current))))))
+
 (defn connected-components
   [g]
   (let [vertices (range (order g))
