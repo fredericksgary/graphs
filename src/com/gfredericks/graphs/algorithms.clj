@@ -19,7 +19,7 @@
                   (= :infinity %2) %1
                   :else (min %1 %2))]
   (defn distances-through
-    [node ds]
+    [ds node]
     (into {}
           (map
            (fn [[pair distance]]
@@ -33,11 +33,7 @@
   [g]
   (let [ap (all-pairs (order g))
         init (into {} (map #(if (edge? g %) [% 1] [% :infinity]) ap))]
-    (loop [[node & nodes] (vertices g) ds init]
-      (let [new-ds (distances-through node ds)]
-        (if (empty? nodes)
-          new-ds
-          (recur nodes new-ds))))))
+    (reduce distances-through init (vertices g))))
 
 (let [map-from-fn (fn [f ks] (into {} (map (juxt identity f) ks)))]
   (defn distances-per-node
