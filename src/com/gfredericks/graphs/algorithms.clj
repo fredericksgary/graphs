@@ -90,7 +90,19 @@
      first
      vals)))
 
-(def connected? (comp #(= 1 %) count connected-components))
+(defn connected?
+  [g]
+  (loop [current #{0}
+         seen #{}]
+    (let [next (->> current
+                    (mapcat #(neighbors g %))
+                    (distinct)
+                    (remove current)
+                    (remove seen)
+                    (set))]
+      (if (empty? next)
+        (= (order g) (+ (count current) (count seen)))
+        (recur next (into seen current))))))
 
 (defn permute
   "Given a graph and a permutation (which is some sort

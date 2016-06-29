@@ -105,3 +105,8 @@
            (set-set (connected-components {:order 8, :edges #{#{0 2} #{0 4} #{1 3} #{0 7} #{3 7} #{4 6}}}))))
     (is (= #{#{0} #{1 6} #{2} #{3 4 5 7}}
            (set-set (connected-components {:order 8, :edges #{#{1 6} #{3 4} #{4 7} #{5 7}}}))))))
+
+(defspec connected-vs-connected-components-test 100
+  (prop/for-all [g gen-graph]
+    (= (boolean (connected? g))
+       (= 1 (count (connected-components g))))))
