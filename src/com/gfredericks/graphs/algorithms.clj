@@ -45,27 +45,27 @@
        (fn [node] (apply + (map apd (filter #(% node) (keys apd)))))
        (vertices g)))))
 
+(defn shortest-path
+  "Returns a sequence of vertices starting with `start` and ending
+  with `end`, or nil if the two vertices are not connected."
+  [g start end]
+  (loop [shortest-paths-to {start [start]}
+         next-gen [start]]
+    (or (shortest-paths-to end)
+        (let [paths (for [v next-gen
+                          neighbor (neighbors g v)
+                          :when (not shortest-paths-to neighbor)]
+                      (conj (shortest-paths-to v) neighbor))]
+          (recur (into shortest-paths-to
+                       (for [path paths]
+                         [(peek path) path]))
+                 (map peek paths))))))
+
 (defn distance
   "Returns an integer distance, or nil if the vertices are not in the
   same connected component"
   [g v1 v2]
-  (loop [d 0
-         current #{v1}
-         seen #{}]
-    (cond (current v2)
-          d
-
-          (empty? current)
-          nil
-
-          :else
-          (let [new-neighbors (->> current
-                                   (mapcat #(neighbors g %))
-                                   (distinct)
-                                   (remove current)
-                                   (remove seen)
-                                   (set))]
-            (recur (inc d) new-neighbors (into seen current))))))
+  (some-> (shortest-path g v1 v2) count))
 
 (defn connected-components
   [g]
