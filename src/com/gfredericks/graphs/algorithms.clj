@@ -54,7 +54,7 @@
     (or (shortest-paths-to end)
         (let [paths (for [v next-gen
                           neighbor (neighbors g v)
-                          :when (not shortest-paths-to neighbor)]
+                          :when (not (shortest-paths-to neighbor))]
                       (conj (shortest-paths-to v) neighbor))]
           (recur (into shortest-paths-to
                        (for [path paths]
