@@ -1,4 +1,4 @@
-(defproject com.gfredericks/graphs "0.3.5"
+(defproject com.gfredericks/graphs "0.3.6-SNAPSHOT"
   :description "Undirected graph-theory clojure stuff."
   :url "https://github.com/fredericksgary/graphs"
   :license {:name "Eclipse Public License"
